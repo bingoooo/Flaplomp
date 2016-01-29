@@ -128,6 +128,6 @@ function GameOver(){
 	player.body.gravity.y = 0;
 	player.body.velocity = 0;
 	player.position.set(32, 200);
-	gameOverScreen = game.add.sprite(game.world.width/2 - 90, 200, 'game_over');
+	gameOverScreen = game.add.sprite(game.world.width/2 - 90, game.world.height/2, 'game_over');
 	gameOverScreen.scale.setTo(2,2);
 }
