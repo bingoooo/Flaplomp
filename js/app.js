@@ -13,6 +13,10 @@ var tuyau_bas;
 var player;
 var cursors;
 var gameover = false;
+var gameOverScreen;
+var score = 0;
+var scoreText;
+var checkpoint;
 
 function preload(){
 	game.load.image('background', 'asset/background.png');
@@ -59,26 +63,32 @@ function create(){
 	player.animations.add('up', [0,1], 10, true);
 
 	cursors = game.input.keyboard.createCursorKeys();
-
 }
 
 function update(){
-
-	game.physics.arcade.collide(player, solid);
-	game.physics.arcade.collide(player, tuyau);
-	if(cursors.up.isDown){
-		start = true;
-		player.body.gravity.y = 500;
-
-	}
+	game.physics.arcade.collide(player, solid, GameOver);
+	game.physics.arcade.collide(player, tuyau, GameOver);
 	if(start){
+		if (gameOverScreen){
+			gameOverScreen.kill();
+		}
+		gameover = false;
 		playerBump();
 		movePipe();
-		if()
+	}else{
+		if(cursors.up.isDown){
+			start = true;
+		}
 	}
-
+	if (gameover){
+		if (cursors.up.isDown){
+			game.state.restart();
+			gameover = false;
+		}
+	}
 }
 function playerBump(){
+	player.body.gravity.y = 500;
 	player.body.velocity.x = 0;
 	if(cursors.up.isDown){
 		player.body.velocity.y = -150;
@@ -99,4 +109,7 @@ function GameOver(){
 	tuyau_haut.body.velocity.x = tuyau_bas.body.velocity.x = 0;
 	player.body.gravity.y = 0;
 	player.body.velocity = 0;
+	player.position.set(32, 200);
+	gameOverScreen = game.add.sprite(game.world.width/2 - 90, 200, 'game_over');
+	gameOverScreen.scale.setTo(2,2);
 }
