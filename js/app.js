@@ -53,10 +53,14 @@ function create(){
 
 	// crétion du player
 	player = game.add.sprite(32, 200, 'flappy', 1);
-	game.physics.arcade.enable(player,true);
+	player.rotation = 0;
+	game.physics.arcade.enable(player);
 	player.scale.setTo(2,2);
 	player.body.collideWorldBounds = true;
-	player.animations.add('up', [0,1], 10, true);
+	player.animations.add('up', [0,1], 5, true);
+	game.debug.body(5,5);
+	game.debug.body('player');
+
 
 	cursors = game.input.keyboard.createCursorKeys();
 
@@ -66,15 +70,25 @@ function update(){
 
 	game.physics.arcade.collide(player, solid);
 	game.physics.arcade.collide(player, tuyau);
+	player.animations.play('up');
 	if(cursors.up.isDown){
 		start = true;
 		player.body.gravity.y = 500;
-
 	}
 	if(start){
 		playerBump();
 		movePipe();
-		if()
+	}
+	if(cursors.up.isDown){
+		player.rotation = 5;
+	}else{
+		player.rotation = 0;
+	}
+	if(player.position.y > 200){
+		player.rotation  += 0.7;
+	}else{
+		player.rotation = 0;
+
 	}
 
 }
