@@ -6,17 +6,17 @@ var game = new Phaser.Game(288, 600, Phaser.AUTO, 'game', {
 });
 var start = false;
 var backgrounds;
-var solid;
-var tuyau;
+var solide;
 var tuyau_haut;
 var tuyau_bas;
 var player;
 var cursors;
 var gameover = false;
 var gameOverScreen;
-var score = 0;
+var score;
 var scoreText;
-var checkpoint;
+var addScore = true;
+var tuyau_random = 0;
 
 function preload(){
 	game.load.image('background', 'asset/background.png');
@@ -24,9 +24,12 @@ function preload(){
 	game.load.image('game_over', 'asset/Game_Over.png')
 	game.load.spritesheet('flappy', 'asset/flapi.png', 17, 12);
 	game.load.spritesheet('tube', 'asset/Tube.png', 26,135);
+	//game.load.image('chekpoint', 'asset/chekpoint.png');
 }
 
 function create(){
+	score = 0;
+
 	//charger le physics
 	game.physics.startSystem(Phaser.Physics.ARCADE);
 	
@@ -35,23 +38,23 @@ function create(){
 	backgrounds.scale.setTo(2,2.4);
 
 	//création du group tuyau
-	tuyau = game.add.group();
-	tuyau.enableBody = true;
+	solide = game.add.group();
+	solide.enableBody = true;
+	//tuyau = game.add.group();
+	//tuyau.enableBody = true;
 
-	tuyau_haut = tuyau.create(300, 0, 'tube',0);
+	tuyau_haut = solide.create(300, 0, 'tube',0);
 	tuyau_haut.body.immovable = true;
 	tuyau_haut.scale.setTo(2,2.4);
 	game.physics.arcade.enable(tuyau_haut);
 
-	tuyau_bas = tuyau.create(300, 400, 'tube',1);
+	tuyau_bas = solide.create(300, 400, 'tube',1);
 	tuyau_bas.body.immovable = true;
 	tuyau_bas.scale.setTo(2,2.4);
 	game.physics.arcade.enable(tuyau_bas);
 
 	//créatio du sol
-	solid = game.add.group();
-	solid.enableBody = true;
-	var ground = solid.create(0, game.world.height - 54, 'ground');
+	var ground = solide.create(0, game.world.height - 54, 'ground');
 	ground.scale.setTo(2,1);
 	ground.body.immovable = true;
 
@@ -67,18 +70,20 @@ function create(){
 
 
 	cursors = game.input.keyboard.createCursorKeys();
+
+	scoreText = game.add.text(16, 16, 'Score: 0', {fontSize: '32px', fill: '#000'});
 }
 
 function update(){
 
-	game.physics.arcade.collide(player, solid, GameOver);
-	game.physics.arcade.collide(player, tuyau, GameOver);
+	game.physics.arcade.collide(player, solide, GameOver);
+	//game.physics.arcade.collide(player, tuyau, GameOver);
 
-	player.animations.play('up');
 	if(start){
 		if (gameOverScreen){
 			gameOverScreen.kill();
 		}
+		player.animations.play('up');
 		gameover = false;
 		playerBump();
 		movePipe();
@@ -115,19 +120,25 @@ function playerBump(){
 function movePipe(){
 	tuyau_haut.body.x = tuyau_bas.body.x -= 1;
 	tuyau_haut.body.velocity.x = tuyau_bas.body.velocity.x = -10;
+	if(tuyau_haut.position.x < 0 && addScore){
+		addScore = false;
+		score += 10;
+		scoreText.text = 'Score: ' + score;
+	}
 	if(tuyau_haut.position.x < -54){
-		tuyau_haut.position.set(300,0);
-		tuyau_bas.position.set(300,400);
+		addScore = true;
+		tuyau_random = Math.floor(Math.random()*140);
+		tuyau_haut.position.set(300, 0 - tuyau_random);
+		tuyau_bas.position.set(300, 400 - tuyau_random);
 	}
 }
 function GameOver(){
 	start = false;
 	gameover = true;
-	tuyau_haut.body.x = tuyau_bas.body.x = 300;
+	player.animations.stop();
 	tuyau_haut.body.velocity.x = tuyau_bas.body.velocity.x = 0;
 	player.body.gravity.y = 0;
 	player.body.velocity = 0;
-	player.position.set(32, 200);
 	gameOverScreen = game.add.sprite(game.world.width/2 - 90, game.world.height/2, 'game_over');
 	gameOverScreen.scale.setTo(2,2);
 }
